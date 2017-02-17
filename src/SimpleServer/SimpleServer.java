@@ -13,6 +13,8 @@ import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import javax.swing.*;
+
 /**
  * A server program which accepts requests from clients to
  * bounce back their strings.  When clients connect, a new thread is
@@ -35,7 +37,7 @@ public class SimpleServer {
     public static void main(String[] args) throws Exception {
         System.out.println("The simple server is running.");
         int clientNumber = 0;
-        try (ServerSocket listener = new ServerSocket(9001)) {
+        try (ServerSocket listener = new ServerSocket(6789)) {
             while (true) {
                 new Responder(listener.accept(), clientNumber++).start();
             }
@@ -47,7 +49,7 @@ public class SimpleServer {
      * socket.  The client terminates the dialogue by sending a single line
      * containing only a q.
      */
-    private static class Responder extends Thread {
+    public static class Responder extends Thread {
         private final Socket socket;
         private final int clientNumber;
 
