@@ -7,7 +7,7 @@ import java.awt.event.*;
 
 import javax.swing.*;
 
-/*
+/**
  * @author Austin Vickers
  * This class is the client side of the CS321 Messenger App.
  * It constructs a GUI that take input from the user and display
@@ -29,17 +29,18 @@ public class MessengerClient extends JFrame{
 	private int serverPort;						//The port that our program uses to connect
 	
 	//Constructor
-	public MessengerClient(String host, int port){
+	public MessengerClient(String host, int port, String username){
 		super("Client");						//Title of the window
 		serverIP = host;
 		serverPort = port;
-		
-		//TO-DO: Add code that handles routing messages to other users.
-		username = "USER";		
+		this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+		//TODO: Function calls to code that handles routing messages to other users.		
+		this.username = username;
 		recipient = "SERVER";
 		
 		userText = new JTextField();			//Creates a new text field we can enter a message into
 		userText.setEditable(false);			//Make sure we don't accept any text just yet
+		
 		//Adds an ActionListener to detect when the user presses "Enter" in the user text field.
 		userText.addActionListener(		
 				new ActionListener(){

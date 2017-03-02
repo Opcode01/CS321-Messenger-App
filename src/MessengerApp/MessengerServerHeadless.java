@@ -7,47 +7,29 @@ import java.io.*;
 import java.awt.*;
 import java.awt.event.*;
 
-/*
+/**
  * @author Austin Vickers, Huaming Zhang
  * 
  * This class is for the server side of the CS321 Messenger App.
- * This is the server console window. It implements an interface "outputLog"
- * that is used by both the MessageServer and the Responder class to output
- * messages to the console.
+ * This is exactly the same as the regular Messenger Server, but it runs
+ * without all the extra GUI stuff in a "Headless" mode. This makes things
+ * easier for running on command-line only OS like Linux.  It implements an 
+ * interface "outputLog" that is used by both the MessageServer and the 
+ * Responder class to output messages to the console.
  */
 
-public class MessengerServer extends JFrame implements outputLog{
+public class MessengerServerHeadless implements outputLog{
 	
-	private JTextField commandLine;			//Place to enter commands
-	private JTextArea console;				//Viewport to the server console
-	private int port = 25565;				//Port the server runs on. MUST MATCH THE PORT OF THE CLIENT!
+	private int port = 25565;			//Port the server runs on. MUST MATCH THE PORT OF THE CLIENT!
 	
 	public static void main(String args[]){
 		System.out.println("The server is starting...");
-		MessengerServer server = new MessengerServer();
-		server.setDefaultCloseOperation(EXIT_ON_CLOSE);
+		MessengerServerHeadless server = new MessengerServerHeadless();
 	}
 	
 	//Constructor. Sets up GUI stuff.
-	public MessengerServer(){	
-		//Add a command line so we can interface with the server
-		commandLine = new JTextField();
-		commandLine.addActionListener(		
-				new ActionListener(){
-				public void actionPerformed(ActionEvent event){
-					command(event.getActionCommand());
-					commandLine.setText("");		//Clear the text field after the event happens
-				}
-			}
-		);
-		add(commandLine, BorderLayout.SOUTH);
-		
-		//Create and add a text area for the chats to appear in
-		console = new JTextArea();
-		add(new JScrollPane(console));
-		//Set window size and draw it on the screen.
-		setSize(1024, 512);
-		setVisible(true);
+	public MessengerServerHeadless(){	
+		System.out.println("Server running in headless mode...");
 		//Start running our server
 		try{
 		startServer();
@@ -139,13 +121,15 @@ public class MessengerServer extends JFrame implements outputLog{
 	}
 	
 	public void MessageRouter(MessagePacket packet){
-		//TODO: write code to route the message packets to the appropriate user
-		//Possibly should be a separate class.
+		/*TODO: write code to route the message packets to the appropriate user
+		* Possibly should be a separate class.
+		*/
 	}
 	
 	public void SendMessage(MessagePacket packet){
-		//TODO: write method for sending a message from the server to a user or
-		//broadcast to a group of users. May need to be a part of the Responder class?
+		/*TODO: write method for sending a message from the server to a user or
+		broadcast to a group of users. May need to be a part of the Responder class?
+		*/
 	}
 	
 	/*Implementation of the "outputLog" interface. Is used by multiple classes 
@@ -154,12 +138,6 @@ public class MessengerServer extends JFrame implements outputLog{
 	 * @see MessengerApp.outputLog#log(java.lang.String)
 	 */
 	public void log(final String message){
-		SwingUtilities.invokeLater(
-			new Runnable(){
-				public void run(){
-					console.append(message);
-				}
-			}
-		);
+		System.out.print(message);
 	}
 }
