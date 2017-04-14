@@ -1,7 +1,7 @@
 package MessengerApp;
 
 import javax.swing.*;
-import SimpleServer.SimpleServer.Responder;
+//import SimpleServer.SimpleServer.Responder;
 import java.net.*;
 import java.io.*;
 import java.awt.*;
@@ -109,8 +109,8 @@ public class MessengerServer extends JFrame implements outputLog{
                     String sender;
 					try {
 						newMessage = (MessagePacket) input.readObject();
-						sender = newMessage.sender;
-						message = newMessage.message;
+						sender = newMessage.getSender();
+						message = newMessage.getMessage();
 						log("\n" + sender + " - " + message);
 						if (message == null || message.equals("q")) {
 	                        break;

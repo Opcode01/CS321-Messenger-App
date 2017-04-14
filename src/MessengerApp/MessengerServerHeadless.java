@@ -91,8 +91,9 @@ public class MessengerServerHeadless implements outputLog{
                     String sender;
 					try {
 						newMessage = (MessagePacket) input.readObject();
-						sender = newMessage.sender;
-						message = newMessage.message;
+						MessageRouter(newMessage);
+						sender = newMessage.getSender();
+						message = newMessage.getMessage();
 						log("\n" + sender + " - " + message);
 						if (message == null || message.equals("q")) {
 	                        break;
@@ -124,6 +125,7 @@ public class MessengerServerHeadless implements outputLog{
 		/*TODO: write code to route the message packets to the appropriate user
 		* Possibly should be a separate class.
 		*/
+		
 	}
 	
 	public void SendMessage(MessagePacket packet){

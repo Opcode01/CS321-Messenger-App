@@ -100,11 +100,11 @@ public class MessengerClient extends JFrame{
 		do{
 			try{
 				message = (MessagePacket) input.readObject();				
-				showMessage("\n" + message.sender + " - " + message.message);
+				showMessage("\n" + message.getSender() + " - " + message.getMessage());
 			}catch(ClassNotFoundException classNotFoundException){
 				showMessage("Unknown data received!");
 			}
-		}while(!message.message.equals("END"));	
+		}while(!message.getMessage().equals("END"));	
 	}
 	
 	//Close connection
