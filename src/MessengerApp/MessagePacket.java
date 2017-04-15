@@ -17,10 +17,17 @@ public class MessagePacket implements Serializable {
 	private String password;
 	
 	//Method to create a normal message packet
-	public MessagePacket(String s1, String s2, String s3){
-		sender = s1;
-		message = s2;
-		recipient = s3;
+
+	/**
+	 *
+	 * @param sender, sender's user ID
+	 * @param message, message being sent
+	 * @param recipient, USER ID of a user or #chatroom
+	 */
+	public MessagePacket(String sender, String message, String recipient){
+		this.sender = sender;
+		this.message = message;
+		this.recipient = recipient;
 	}
 	
 	//Method used to create an authentication MessagePacket
