@@ -1,11 +1,14 @@
 package MessengerApp;
 
+import com.sun.deploy.util.SessionState;
+
 import javax.swing.*;
 //import SimpleServer.SimpleServer.Responder;
 import java.net.*;
 import java.io.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.*;
 
 /*
  * @author Austin Vickers, Huaming Zhang
@@ -22,6 +25,7 @@ public class MessengerServer extends JFrame implements outputLog{
 	private JTextArea console;				//Viewport to the server console
 	private int port = 25565;				//Port the server runs on. MUST MATCH THE PORT OF THE CLIENT!
 	private jdbcConnection connection;		//Connection to the database needed to authenticate users
+	private Map<String, ObjectOutputStream> ClientConnections = new HashMap();
 	
 	public static void main(String args[]){
 		System.out.println("The server is starting...");
@@ -77,6 +81,7 @@ public class MessengerServer extends JFrame implements outputLog{
 	private class Responder extends Thread{
         private final Socket socket;
         private final int clientNumber;
+        private String username;
         private ObjectOutputStream output;
         private ObjectInputStream input;
         private String welcomeMessage;
@@ -103,15 +108,16 @@ public class MessengerServer extends JFrame implements outputLog{
             	output = new ObjectOutputStream(socket.getOutputStream());
             	output.flush();
             	
-            	if(authenticateUser((MessagePacket) input.readObject()) == false){
+            	if(authenticateUser((MessagePacket) input.readObject())){
             		log("\nUser Authentication failed!\n");
             		input.close();
                 	output.close();
                     socket.close();
             		return;
             	}
-            	
-       
+
+				ClientConnections.put(username, output);
+
                 // Send a welcome message to the client.
             	welcomeMessage = "Hello, you are client #" + clientNumber + ".\n";
             	output.writeObject(new MessagePacket("Server", welcomeMessage, "Client" ));
@@ -129,6 +135,7 @@ public class MessengerServer extends JFrame implements outputLog{
 						if (message == null || message.equals("q")) {
 	                        break;
 	                    }
+	                    MessageRouter(newMessage);
 					} catch (ClassNotFoundException e) {
 						log("\n Server cannot read this object.");
 					}
@@ -140,6 +147,7 @@ public class MessengerServer extends JFrame implements outputLog{
 				log("\n Server cannot read this object");
 			} finally {
                 try {
+                	ClientConnections.remove(username);
                 	input.close();
                 	output.close();
                     socket.close();
@@ -154,9 +162,10 @@ public class MessengerServer extends JFrame implements outputLog{
         	//First packet received should be a MessagePacket with the auth value as false      		
        		String userID = authPacket.getSender();
        		String userPass = authPacket.getPassword();
-       		if(con.authenticate(userID, userPass) == true){
+       		if(con.authenticate(userID, userPass)){
        			authPacket.setAuthState(true);
        			output.writeObject(authPacket);
+       			username = userID;
        			return true;
         	}
         	else{
@@ -174,6 +183,15 @@ public class MessengerServer extends JFrame implements outputLog{
 	}
 	
 	public void MessageRouter(MessagePacket packet){
+		if(ClientConnections.containsKey(packet.getRecipient())) {
+			try {
+				ClientConnections.get(packet.getRecipient()).writeObject(packet);
+			} catch (IOException e) {
+				log("\n Could not deliver message to user " + packet.getRecipient());
+			}
+		}else{
+			log("\n Cannot deliver message, user is not connected: "+packet.getRecipient());
+		}
 		//TODO: write code to route the message packets to the appropriate user
 		//Possibly should be a separate class.
 	}
