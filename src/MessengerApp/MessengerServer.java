@@ -21,6 +21,7 @@ public class MessengerServer extends JFrame implements outputLog{
 	private JTextField commandLine;			//Place to enter commands
 	private JTextArea console;				//Viewport to the server console
 	private int port = 25565;				//Port the server runs on. MUST MATCH THE PORT OF THE CLIENT!
+	private jdbcConnection connection;		//Connection to the database needed to authenticate users
 	
 	public static void main(String args[]){
 		System.out.println("The server is starting...");
@@ -30,6 +31,8 @@ public class MessengerServer extends JFrame implements outputLog{
 	
 	//Constructor. Sets up GUI stuff.
 	public MessengerServer(){	
+		
+		connection = new jdbcConnection();
 		//Add a command line so we can interface with the server
 		commandLine = new JTextField();
 		commandLine.addActionListener(		
@@ -77,12 +80,14 @@ public class MessengerServer extends JFrame implements outputLog{
         private ObjectOutputStream output;
         private ObjectInputStream input;
         private String welcomeMessage;
+        private jdbcConnection con;
         
         //Constructor for the Responder Class
         public Responder(Socket socket, int clientNumber) {
             this.socket = socket;
             this.clientNumber = clientNumber;
             log("\nNew connection with client# " + clientNumber + " at " + socket);
+            con = new jdbcConnection();
         }
 
         /**
@@ -97,7 +102,16 @@ public class MessengerServer extends JFrame implements outputLog{
             	input = new ObjectInputStream(socket.getInputStream());
             	output = new ObjectOutputStream(socket.getOutputStream());
             	output.flush();
-
+            	
+            	if(authenticateUser((MessagePacket) input.readObject()) == false){
+            		log("\nUser Authentication failed!\n");
+            		input.close();
+                	output.close();
+                    socket.close();
+            		return;
+            	}
+            	
+       
                 // Send a welcome message to the client.
             	welcomeMessage = "Hello, you are client #" + clientNumber + ".\n";
             	output.writeObject(new MessagePacket("Server", welcomeMessage, "Client" ));
@@ -121,7 +135,10 @@ public class MessengerServer extends JFrame implements outputLog{
                 }
             } catch (IOException e) {
                 log("\n Error handling client# " + clientNumber + ": " + e);
-            } finally {
+            } catch (ClassNotFoundException e1) {
+				// TODO Auto-generated catch block
+				log("\n Server cannot read this object");
+			} finally {
                 try {
                 	input.close();
                 	output.close();
@@ -132,7 +149,25 @@ public class MessengerServer extends JFrame implements outputLog{
                 log("\n Connection with client# " + clientNumber + " closed\n");
             }
         }
-	}
+        
+        public boolean authenticateUser(MessagePacket authPacket) throws IOException{
+        	//First packet received should be a MessagePacket with the auth value as false      		
+       		String userID = authPacket.getSender();
+       		String userPass = authPacket.getPassword();
+       		if(con.authenticate(userID, userPass) == true){
+       			authPacket.setAuthState(true);
+       			output.writeObject(authPacket);
+       			return true;
+        	}
+        	else{
+       			authPacket.setAuthState(false);
+       			output.writeObject(authPacket);
+       			
+       			return false;
+       		}
+        }
+                
+    }        
 	
 	public void command(String command){
 		//TODO: write code to take commands from the server operator

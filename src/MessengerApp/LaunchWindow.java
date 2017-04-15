@@ -5,6 +5,7 @@ import java.awt.EventQueue;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JPasswordField;
 import javax.swing.border.EmptyBorder;
 import javax.swing.JTextField;
 import java.awt.GridLayout;
@@ -38,7 +39,9 @@ public class LaunchWindow extends JFrame {
 	private JTextField IPAddressField;
 	private JTextField PortField;
 	private JTextField UsernameField;
+	private JTextField passwordField;
 	private JTextArea outputText;
+	private JTextField textField;
 	
 	
 	public static void main(String[] args) {
@@ -65,14 +68,14 @@ public class LaunchWindow extends JFrame {
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
 		
-		JLabel Title = new JLabel("Welcome to the CS 321 Messenging App!");
+		JLabel Title = new JLabel("Login to UNICORN Messenger");
 		Title.setHorizontalAlignment(SwingConstants.CENTER);
 		Title.setFont(new Font("Tahoma", Font.BOLD, 14));
-		Title.setBounds(10, 11, 414, 14);
+		Title.setBounds(10, 0, 414, 31);
 		contentPane.add(Title);
 		
 		IPAddressField = new JTextField();
-		IPAddressField.setBounds(68, 36, 204, 20);
+		IPAddressField.setBounds(83, 36, 189, 20);
 		contentPane.add(IPAddressField);
 		IPAddressField.setColumns(20);
 		
@@ -90,11 +93,11 @@ public class LaunchWindow extends JFrame {
 		contentPane.add(lblPort);
 		
 		JLabel lblUser = new JLabel("Username:");
-		lblUser.setBounds(10, 67, 71, 14);
+		lblUser.setBounds(10, 70, 71, 14);
 		contentPane.add(lblUser);
 		
 		UsernameField = new JTextField();
-		UsernameField.setBounds(68, 67, 204, 20);
+		UsernameField.setBounds(83, 67, 189, 20);
 		contentPane.add(UsernameField);
 		UsernameField.setColumns(10);
 		
@@ -114,6 +117,15 @@ public class LaunchWindow extends JFrame {
 		outputText.setBounds(10, 161, 262, 24);
 		contentPane.add(outputText);
 		
+		passwordField = new JPasswordField();
+		passwordField.setBounds(83, 100, 189, 22);
+		contentPane.add(passwordField);
+		passwordField.setColumns(10);
+		
+		JLabel lblPassword = new JLabel("Password:");
+		lblPassword.setBounds(12, 103, 69, 16);
+		contentPane.add(lblPassword);
+		
 		//TODO: Add password field
 
 	}
@@ -126,13 +138,14 @@ public class LaunchWindow extends JFrame {
 			String ip = IPAddressField.getText();
 			int port = Integer.parseInt(PortField.getText());
 			String user = UsernameField.getText();
+			String pass = passwordField.getText();
 			
 			//We need to run each new client in a Thread because otherwise the program will halt. 
 			//RULE OF THUMB: New thread for every new window.
 			Thread client = new Thread(new Runnable(){
 				public void run(){					
 					//TODO: Run code to authenticate user with server
-					MessengerClient c = new MessengerClient(ip, port, user);
+					MessengerClient c = new MessengerClient(ip, port, user, pass);
 				}
 			});	
 			client.start();

@@ -27,18 +27,69 @@ public class MessengerClient extends JFrame{
 	private String recipient;					//The person this client is currently talking to
 	private Socket connection;					//The actual socket used to establish the connection
 	private int serverPort;						//The port that our program uses to connect
+	private String userPassword;				//The password of the user using this client
 	
 	//Constructor
-	public MessengerClient(String host, int port, String username){
-		super("Client");						//Title of the window
+	public MessengerClient(String host, int port, String username, String password){
+		super("Client");	
 		serverIP = host;
-		serverPort = port;
-		this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+		serverPort = port;		
 		//TODO: Function calls to code that handles routing messages to other users.		
 		this.username = username;
+		this.userPassword = password;
 		recipient = "SERVER";
 		
-		userText = new JTextField();			//Creates a new text field we can enter a message into
+		//Construct GUI:
+		constructGUI();
+		
+		//Start running our client
+		startRunning();
+	}
+	
+	//@SuppressWarnings("unchecked")
+	public void constructGUI(){
+		
+		this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+		JDesktopPane desktopPane = new JDesktopPane();
+		getContentPane().add(desktopPane, BorderLayout.CENTER);
+		
+		//Create and add a text area for the chats to appear in
+		chatWindow = new JTextArea();
+		JScrollPane scrollPane = new JScrollPane(chatWindow);
+		scrollPane.setBounds(183, 0, 439, 410);
+		desktopPane.add(scrollPane);
+		
+		JPanel panel = new JPanel();
+		panel.setBounds(0, 0, 184, 411);
+		desktopPane.add(panel);
+		panel.setLayout(new BorderLayout(0, 0));
+		
+		JList<String> OnlineUsers = new JList<String>();
+		OnlineUsers.setBackground(Color.LIGHT_GRAY);
+		OnlineUsers.setVisibleRowCount(10);
+		OnlineUsers.setAlignmentX(Component.RIGHT_ALIGNMENT);
+		OnlineUsers.setAlignmentY(Component.TOP_ALIGNMENT);
+		OnlineUsers.setToolTipText("Online Users");
+		OnlineUsers.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		OnlineUsers.setFont(new Font("Arial", Font.BOLD, 24));	
+		ListModel<String> bigData = new AbstractListModel<String>() {
+			 private String[] friendsList = {""};				//List of online users we can chat with
+		     public int getSize() { return friendsList.length; }
+		     public String getElementAt(int index) { return friendsList[index]; }
+		     public void addElement(String e){
+		    	 friendsList[friendsList.length] = e;
+		     }
+		 };
+		OnlineUsers.setModel(bigData);
+		
+		panel.add(OnlineUsers);
+		
+		JLabel lblOnlineUsers = new JLabel("Online Users:");
+		lblOnlineUsers.setFont(new Font("Calibri", Font.BOLD, 20));
+		panel.add(lblOnlineUsers, BorderLayout.NORTH);
+		
+		userText = new JTextField();
+		getContentPane().add(userText, BorderLayout.SOUTH);
 		userText.setEditable(false);			//Make sure we don't accept any text just yet
 		
 		//Adds an ActionListener to detect when the user presses "Enter" in the user text field.
@@ -50,16 +101,9 @@ public class MessengerClient extends JFrame{
 				}
 			}
 		);
-		add(userText, BorderLayout.SOUTH);		//Add this element to the window
-		
-		//Create and add a text area for the chats to appear in
-		chatWindow = new JTextArea();
-		add(new JScrollPane(chatWindow));
 		//Set window size and draw it on the screen.
 		setSize(640, 480);
 		setVisible(true);
-		//Start running our client
-		startRunning();
 	}
 	
 	//Connect to server
@@ -67,6 +111,9 @@ public class MessengerClient extends JFrame{
 		try{
 			connectToServer();
 			setupStreams();
+			if(!requestAuthentication()){
+				showMessage("\nInvalid user/pass. Server refused the connection.");
+			}
 			whileChatting();
 		}catch(EOFException eofE){
 			showMessage("\n Client terminated the connection");
@@ -92,6 +139,23 @@ public class MessengerClient extends JFrame{
 		output.flush();
 		input = new ObjectInputStream(connection.getInputStream());
 		//showMessage("\n The streams are now set up! \n");
+	}
+	
+	private boolean requestAuthentication() throws IOException{
+		//Send out auth request to server
+		output.writeObject(new MessagePacket(username, userPassword, false));
+		output.flush();
+		try{
+			MessagePacket response = (MessagePacket) input.readObject();
+			if(response.getAuthState() == true)
+				return true;
+			else
+				return false;
+		}
+		catch(ClassNotFoundException e){
+			showMessage("Could not read data from server");
+			return false;
+		}
 	}
 	
 	//While chatting with server

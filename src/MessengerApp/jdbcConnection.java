@@ -139,7 +139,7 @@ public class jdbcConnection implements Connection{
 		try{  
 		Class.forName("oracle.jdbc.driver.OracleDriver");    
 		Connection con=DriverManager.getConnection(  
-		"jdbc:oracle:thin:@localhost:1521:xe","jims","oracle");	
+		"jdbc:oracle:thin:@localhost:1521:xe","system","system");	
 		
 		PreparedStatement ps = con.prepareStatement("SELECT password from user_data WHERE user_id = ?");
 		ps.setString(1, user_id);
@@ -164,7 +164,10 @@ public class jdbcConnection implements Connection{
 			success =  false;
 		}
 		
-		}catch(Exception e){ System.out.println(e);}  
+		}catch(Exception e){ 
+			System.out.println(e);
+			success = false;
+		}  
 		
 		return success;
 	}
