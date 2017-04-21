@@ -27,7 +27,7 @@ public class jdbcConnection implements Connection{
 	Class.forName("oracle.jdbc.driver.OracleDriver");  
 	//create  the connection object  
 	Connection con = DriverManager.getConnection(  
-	"jdbc:oracle:thin:@localhost:1521:xe","jims","oracle");  
+	"jdbc:oracle:thin:@localhost:1521:xe","system","system");  
 	/*setup is for local oracledatabase.for remote we need our ip and port number here^^,
 	XE is the oracle service running, followed by db username and pass*/
 	//create the statement object  
@@ -57,39 +57,42 @@ public class jdbcConnection implements Connection{
 }
 	
 	/*Query displays result set of who is online.**/
-	public void online()
+	public String[] online()
 	{
+		String[] onlineUsers = {""};
 		String query = "SELECT user_number, user_id FROM user_data where connection_status = 1";
 		try{  
 			//load the driver class  
 			Class.forName("oracle.jdbc.driver.OracleDriver");  
 			//create  the connection object  
 			Connection con = DriverManager.getConnection(  
-			"jdbc:oracle:thin:@localhost:1521:xe","jims","oracle");  
+			"jdbc:oracle:thin:@localhost:1521:xe","system","system");  
 			//create the statement object  
 			Statement stmt = con.createStatement();  	  
 			//execute query 
 			ResultSet rs = stmt.executeQuery(query);  
 			ResultSetMetaData resultSetMetaData = rs.getMetaData();
 			int columnCount = resultSetMetaData.getColumnCount();
+			
 		    //Cycle through output
 			while(rs.next())
 			{
 				for(int i = 1; i <= columnCount; i++)
 				{
-			        if(!(i==columnCount))
-			        {
-			        	System.out.print(rs.getString(i)+"\t");
-			        }
-			        else
-			        {
-			            System.out.println(rs.getString(i));
-			        }
-				}   
+			        	onlineUsers[i] = rs.getString(i);
+			        	//System.out.print(rs.getString(i)+"\t");
+			    }
+			    
 			}
+			
 			//close the connection object  and release resources
 			con.close();  
-			}catch(Exception e){ System.out.println(e);}  
+			return onlineUsers;
+			
+			}catch(Exception e){ 
+				System.out.println(e);
+				return onlineUsers;
+			}  
 	}
 	
 	/*Query displays result set of who is offline.**/
@@ -101,7 +104,7 @@ public class jdbcConnection implements Connection{
 			Class.forName("oracle.jdbc.driver.OracleDriver");  
 			//create  the connection object  
 			Connection con = DriverManager.getConnection(  
-			"jdbc:oracle:thin:@localhost:1521:xe","jims","oracle");  
+			"jdbc:oracle:thin:@localhost:1521:xe","system","system");  
 			//create the statement object  
 			Statement stmt = con.createStatement();  	  
 			//execute query 
@@ -139,9 +142,9 @@ public class jdbcConnection implements Connection{
 		try{  
 		Class.forName("oracle.jdbc.driver.OracleDriver");    
 		Connection con=DriverManager.getConnection(  
-		"jdbc:oracle:thin:@localhost:1521:xe","system","system");	
+		"jdbc:oracle:thin:@localhost:1521:xe","unicorn" ,"messenger");	
 		
-		PreparedStatement ps = con.prepareStatement("SELECT password from user_data WHERE user_id = ?");
+		PreparedStatement ps = con.prepareStatement("SELECT password FROM user_data WHERE user_id = ?");
 		ps.setString(1, user_id);
 		// execute select SQL statement
 		ResultSet rs = ps.executeQuery();
@@ -152,7 +155,6 @@ public class jdbcConnection implements Connection{
 		if (password.equals(storedPass) )
 		{
 			System.out.println("User " + user_id + " password accepted.");
-			System.out.println("Invalid password enter by user " + user_id + ".");
 			con.close();
 			success = true;
 		}
@@ -182,7 +184,7 @@ public class jdbcConnection implements Connection{
 			Class.forName("oracle.jdbc.driver.OracleDriver");  
 			//step2 create  the connection object  
 			Connection con=DriverManager.getConnection(  
-			"jdbc:oracle:thin:@localhost:1521:xe","jims","oracle");
+			"jdbc:oracle:thin:@localhost:1521:xe","system","system");
 			
 
 			String query = "UPDATE user_data SET connection_status = '0' where user_id = ?";
@@ -204,7 +206,7 @@ public class jdbcConnection implements Connection{
 			try{  
 			Class.forName("oracle.jdbc.driver.OracleDriver");  
 			Connection con=DriverManager.getConnection(  
-			"jdbc:oracle:thin:@localhost:1521:xe","jims","oracle");
+			"jdbc:oracle:thin:@localhost:1521:xe","system","system");
 
 			String query = "UPDATE user_data SET connection_status = '1' where user_id = ?";
 			PreparedStatement ps = con.prepareStatement(query);
@@ -224,7 +226,7 @@ public class jdbcConnection implements Connection{
 			Class.forName("oracle.jdbc.driver.OracleDriver");  
 			//step2 create  the connection object  
 			Connection con=DriverManager.getConnection(  
-			"jdbc:oracle:thin:@localhost:1521:xe","jims","oracle");
+			"jdbc:oracle:thin:@localhost:1521:xe","system","system");
 			String query = "SELECT user_id, connection_status, email, first_name, last_name, address, city, state FROM user_data WHERE user_id = ?";////need method to retrieve user name here, or default for self view"
 			PreparedStatement ps = con.prepareStatement(query);
 			ps.setString(1, user_id);

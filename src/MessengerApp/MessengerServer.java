@@ -1,9 +1,7 @@
 package MessengerApp;
 
-import com.sun.deploy.util.SessionState;
-
+//import com.sun.deploy.util.SessionState;
 import javax.swing.*;
-//import SimpleServer.SimpleServer.Responder;
 import java.net.*;
 import java.io.*;
 import java.awt.*;
@@ -91,7 +89,7 @@ public class MessengerServer extends JFrame implements outputLog{
         public Responder(Socket socket, int clientNumber) {
             this.socket = socket;
             this.clientNumber = clientNumber;
-            log("\nNew connection with client# " + clientNumber + " at " + socket);
+            log("\nNew connection with client# " + clientNumber + " at " + socket + "\n");
             con = new jdbcConnection();
         }
 
@@ -106,46 +104,70 @@ public class MessengerServer extends JFrame implements outputLog{
             	//Set up the in and out streams for this client.
             	input = new ObjectInputStream(socket.getInputStream());
             	output = new ObjectOutputStream(socket.getOutputStream());
-            	output.flush();
             	
-            	if(authenticateUser((MessagePacket) input.readObject())){
-            		log("\nUser Authentication failed!\n");
-            		input.close();
-                	output.close();
-                    socket.close();
-            		return;
-            	}
-
 				ClientConnections.put(username, output);
 
-                // Send a welcome message to the client.
-            	welcomeMessage = "Hello, you are client #" + clientNumber + ".\n";
-            	output.writeObject(new MessagePacket("Server", welcomeMessage, "Client" ));
-            	
                 // Get messages from the clients and print them out in the console.
                 while (true) {
                 	MessagePacket newMessage;
                     String message;
                     String sender;
 					try {
-						newMessage = (MessagePacket) input.readObject();
-						sender = newMessage.getSender();
-						message = newMessage.getMessage();
-						log("\n" + sender + " - " + message);
-						if (message == null || message.equals("q")) {
-	                        break;
-	                    }
-	                    MessageRouter(newMessage);
+						Object received = input.readObject();
+						if(received.getClass().getName() == "MessengerApp.MessagePacket"){						
+							newMessage = (MessagePacket) received;
+							sender = newMessage.getSender();
+							message = newMessage.getMessage();
+							log("\n" + sender + " - " + message);
+							if (message == null || message.equals("q")) {
+								break;
+	                    	}
+							MessageRouter(newMessage);
+						}
+						else if(received.getClass().getName() == "MessengerApp.ServiceRequest"){
+							//Check to see what service the user would like
+							ServiceRequest service = (ServiceRequest) received;
+							if(service.getRequest() == "getOnlineUsers"){
+								service.setResponse(onlineUsers());
+								service.setSuccess(true);
+								output.writeObject(service);
+							}
+							else{
+								log("Cannot understand user request: " +service.getRequest() 
+									+"from user " +username );
+								service.setSuccess(false);
+								output.writeObject(service);
+							}	
+						}
+						else if(received.getClass().getName() == "MessengerApp.AuthenticationPacket"){
+							log("Recieved auth request from client #" + clientNumber +"\n");
+							if(!authenticateUser(received)){
+			            		log("User Authentication failed!\n");
+			            		input.close();
+			                	output.close();
+			                    socket.close();
+			            		return;
+			            	}
+			            	else{
+			            		// Send a welcome message to the client.
+			                	welcomeMessage = "Hello, you are client #" + clientNumber + ".\n";
+			                	output.writeObject(new MessagePacket("Server", welcomeMessage, "Client" ));	
+			            	}
+						}
+						else{
+							//If received something we didn't expect:
+							log("\n " + received.getClass().getName());
+							break;
+						}
+						
 					} catch (ClassNotFoundException e) {
 						log("\n Server cannot read this object.");
 					}
                 }
             } catch (IOException e) {
                 log("\n Error handling client# " + clientNumber + ": " + e);
-            } catch (ClassNotFoundException e1) {
-				// TODO Auto-generated catch block
-				log("\n Server cannot read this object");
-			} finally {
+            }
+			finally {
                 try {
                 	ClientConnections.remove(username);
                 	input.close();
@@ -154,14 +176,16 @@ public class MessengerServer extends JFrame implements outputLog{
                 } catch (IOException e) {
                     log("\n Couldn't close a socket, what's going on?");
                 }
-                log("\n Connection with client# " + clientNumber + " closed\n");
+                log("Connection with client# " + clientNumber + " closed\n");
             }
         }
         
-        public boolean authenticateUser(MessagePacket authPacket) throws IOException{
-        	//First packet received should be a MessagePacket with the auth value as false      		
+        public boolean authenticateUser(Object Packet) throws IOException{
+        	//First packet received should be a MessagePacket with the auth value as false    
+        	AuthenticationPacket authPacket = (AuthenticationPacket) Packet;
        		String userID = authPacket.getSender();
        		String userPass = authPacket.getPassword();
+       		
        		if(con.authenticate(userID, userPass)){
        			authPacket.setAuthState(true);
        			output.writeObject(authPacket);
@@ -174,6 +198,7 @@ public class MessengerServer extends JFrame implements outputLog{
        			
        			return false;
        		}
+       		
         }
                 
     }        
@@ -194,6 +219,15 @@ public class MessengerServer extends JFrame implements outputLog{
 		}
 		//TODO: write code to route the message packets to the appropriate user
 		//Possibly should be a separate class.
+	}
+	
+	//Method returns a list of all online users
+	public String[] onlineUsers(){
+		String[] ret;
+		Set<String> users = ClientConnections.keySet();
+		ret = (String[]) users.toArray();
+		return ret;
+		
 	}
 	
 	public void SendMessage(MessagePacket packet){

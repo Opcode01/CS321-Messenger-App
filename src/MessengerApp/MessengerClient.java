@@ -24,10 +24,11 @@ public class MessengerClient extends JFrame{
 	private MessagePacket message;				//The message object to send back and forth				
 	private String serverIP;					//IP address of the server we want to connect to
 	private String username;					//The username of this Client instance
-	private String recipient;					//The person this client is currently talking to
+	ListModel<String> recipients;				//The people this client can talk to
 	private Socket connection;					//The actual socket used to establish the connection
 	private int serverPort;						//The port that our program uses to connect
 	private String userPassword;				//The password of the user using this client
+	private String[] test;
 	
 	//Constructor
 	public MessengerClient(String host, int port, String username, String password){
@@ -37,7 +38,6 @@ public class MessengerClient extends JFrame{
 		//TODO: Function calls to code that handles routing messages to other users.		
 		this.username = username;
 		this.userPassword = password;
-		recipient = "SERVER";
 		
 		//Construct GUI:
 		constructGUI();
@@ -72,15 +72,8 @@ public class MessengerClient extends JFrame{
 		OnlineUsers.setToolTipText("Online Users");
 		OnlineUsers.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		OnlineUsers.setFont(new Font("Arial", Font.BOLD, 24));	
-		ListModel<String> bigData = new AbstractListModel<String>() {
-			 private String[] friendsList = {""};				//List of online users we can chat with
-		     public int getSize() { return friendsList.length; }
-		     public String getElementAt(int index) { return friendsList[index]; }
-		     public void addElement(String e){
-		    	 friendsList[friendsList.length] = e;
-		     }
-		 };
-		OnlineUsers.setModel(bigData);
+		recipients = new DefaultListModel<String>();
+		OnlineUsers.setModel(recipients);
 		
 		panel.add(OnlineUsers);
 		
@@ -114,6 +107,7 @@ public class MessengerClient extends JFrame{
 			if(!requestAuthentication()){
 				showMessage("\nInvalid user/pass. Server refused the connection.");
 			}
+			//((DefaultListModel<String>) recipients).copyInto(requestOnlineUsers());
 			whileChatting();
 		}catch(EOFException eofE){
 			showMessage("\n Client terminated the connection");
@@ -141,12 +135,32 @@ public class MessengerClient extends JFrame{
 		//showMessage("\n The streams are now set up! \n");
 	}
 	
-	private boolean requestAuthentication() throws IOException{
-		//Send out auth request to server
-		output.writeObject(new MessagePacket(username, userPassword, false));
+	private String[] requestOnlineUsers() throws IOException{
+		output.writeObject(new ServiceRequest("getOnlineUsers"));
 		output.flush();
 		try{
-			MessagePacket response = (MessagePacket) input.readObject();
+			ServiceRequest response = (ServiceRequest) input.readObject();
+			if(response.isSuccess()){
+				return (String[]) response.getResponse();
+			}
+			else{
+				showMessage("Server could not fulfill the request\n");
+				return null;
+			}
+		}
+		catch(ClassNotFoundException e){
+			showMessage("Could not read data from server\n");
+			return null;
+		}
+	}
+	
+	private boolean requestAuthentication() throws IOException{
+		//Send out auth request to server
+		output.writeObject(new AuthenticationPacket(username, userPassword));
+		output.flush();
+		showMessage("\nRequesting authentication from server\n");
+		try{
+			AuthenticationPacket response = (AuthenticationPacket) input.readObject();
 			if(response.getAuthState() == true)
 				return true;
 			else
@@ -187,7 +201,7 @@ public class MessengerClient extends JFrame{
 	//Send message to server
 	private void sendMessage(String message){
 		try{
-			output.writeObject(new MessagePacket(username, message, recipient));
+			output.writeObject(new MessagePacket(username, message, "Stinky"));
 			output.flush();
 			showMessage("\n" + username + " - " + message);
 		}catch(IOException ioException){
