@@ -18,7 +18,7 @@ import java.awt.event.*;
  * Responder class to output messages to the console.
  */
 
-public class MessengerServerHeadless implements outputLog{
+public class MessengerServerHeadless implements ServerIO{
 	
 	private int port = 25565;			//Port the server runs on. MUST MATCH THE PORT OF THE CLIENT!
 	

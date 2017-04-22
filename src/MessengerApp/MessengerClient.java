@@ -7,6 +7,8 @@ import java.awt.*;
 import java.awt.event.*;
 
 import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 /**
  * @author Austin Vickers
@@ -22,14 +24,13 @@ public class MessengerClient extends JFrame{
 	private JTextArea chatWindow;				//The window where messages will appear
 	private ObjectOutputStream output;			//The steam sending messages to the server
 	private ObjectInputStream input;			//The stream taking in messages from the server
-	private MessagePacket message;				//The message object to send back and forth				
 	private String serverIP;					//IP address of the server we want to connect to
 	private String username;					//The username of this Client instance
-	DefaultListModel<String> recipients;		//The people this client can talk to
+	private String recipient;					//The recipient the user has selected
+	private DefaultListModel<String> userList;	//The people this client can talk to
 	private Socket connection;					//The actual socket used to establish the connection
 	private int serverPort;						//The port that our program uses to connect
 	private String userPassword;				//The password of the user using this client
-	private String[] test;
 	
 	//Constructor
 	public MessengerClient(String host, int port, String username, String password){
@@ -73,8 +74,15 @@ public class MessengerClient extends JFrame{
 		OnlineUsers.setToolTipText("Online Users");
 		OnlineUsers.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		OnlineUsers.setFont(new Font("Arial", Font.BOLD, 24));	
-		recipients = new DefaultListModel<String>();
-		OnlineUsers.setModel(recipients);
+		userList = new DefaultListModel<String>();
+		OnlineUsers.setModel(userList);
+		OnlineUsers.addListSelectionListener(new ListSelectionListener(){
+			public void valueChanged(ListSelectionEvent arg0) {
+				recipient = OnlineUsers.getSelectedValue();
+				chatWindow.setText("\n");
+				showMessage("Now talking to "+recipient +". \n");
+			}
+		});
 		
 		panel.add(OnlineUsers);
 		
@@ -178,9 +186,9 @@ public class MessengerClient extends JFrame{
 					ServiceRequest service = (ServiceRequest) received;
 					if(service.isSuccess()){
 						String[] string = service.getResponse();
-						recipients.clear();
+						userList.clear();
 						for(int i = 0; i < string.length; i++){
-							recipients.addElement(string[i]);
+							userList.addElement(string[i]);
 						}
 						
 					}
@@ -218,7 +226,7 @@ public class MessengerClient extends JFrame{
 	//Send message to server
 	private void sendMessage(String message){
 		try{
-			output.writeObject(new MessagePacket(username, message, "Stinky"));
+			output.writeObject(new MessagePacket(username, message, recipient));
 			output.flush();
 			showMessage("\n" + username + " - " + message);
 		}catch(IOException ioException){
