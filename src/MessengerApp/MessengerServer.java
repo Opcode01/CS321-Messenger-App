@@ -17,12 +17,12 @@ import java.util.*;
  * messages to the console.
  */
 
-public class MessengerServer extends JFrame implements outputLog{
+public class MessengerServer extends JFrame implements ServerIO{
 	
 	private JTextField commandLine;			//Place to enter commands
 	private JTextArea console;				//Viewport to the server console
 	private int port = 25565;				//Port the server runs on. MUST MATCH THE PORT OF THE CLIENT!
-	private jdbcConnection connection;		//Connection to the database needed to authenticate users
+	//This Map contains all the users currently connected. Written by Matthew Legowski
 	private Map<String, ObjectOutputStream> ClientConnections = new HashMap();
 	
 	public static void main(String args[]){
@@ -34,7 +34,6 @@ public class MessengerServer extends JFrame implements outputLog{
 	//Constructor. Sets up GUI stuff.
 	public MessengerServer(){	
 		
-		connection = new jdbcConnection();
 		//Add a command line so we can interface with the server
 		commandLine = new JTextField();
 		commandLine.addActionListener(		
@@ -105,20 +104,20 @@ public class MessengerServer extends JFrame implements outputLog{
             	input = new ObjectInputStream(socket.getInputStream());
             	output = new ObjectOutputStream(socket.getOutputStream());
             	
-				ClientConnections.put(username, output);
-
                 // Get messages from the clients and print them out in the console.
                 while (true) {
                 	MessagePacket newMessage;
                     String message;
                     String sender;
+                    String recipient;
 					try {
 						Object received = input.readObject();
 						if(received.getClass().getName() == "MessengerApp.MessagePacket"){						
 							newMessage = (MessagePacket) received;
 							sender = newMessage.getSender();
 							message = newMessage.getMessage();
-							log("\n" + sender + " - " + message);
+							recipient = newMessage.getRecipient();
+							log("\n" + sender + " - " + message + " to " +recipient);
 							if (message == null || message.equals("q")) {
 								break;
 	                    	}
@@ -148,11 +147,11 @@ public class MessengerServer extends JFrame implements outputLog{
 			                    socket.close();
 			            		return;
 			            	}
-			            	else{
-			            		// Send a welcome message to the client.
-			                	welcomeMessage = "Hello, you are client #" + clientNumber + ".\n";
-			                	output.writeObject(new MessagePacket("Server", welcomeMessage, "Client" ));	
-			            	}
+							else{
+								   // Send a welcome message to the client.
+			             welcomeMessage = "Welcome, " +username +" you are client #" + clientNumber + ".\n";
+			             output.writeObject(new MessagePacket("SERVER::", welcomeMessage, "Client" ));	
+							}
 						}
 						else{
 							//If received something we didn't expect:
@@ -176,7 +175,7 @@ public class MessengerServer extends JFrame implements outputLog{
                 } catch (IOException e) {
                     log("\n Couldn't close a socket, what's going on?");
                 }
-                log("Connection with client# " + clientNumber + " closed\n");
+                log("\nConnection with client# " + clientNumber + " closed\n");
             }
         }
         
@@ -190,6 +189,7 @@ public class MessengerServer extends JFrame implements outputLog{
        			authPacket.setAuthState(true);
        			output.writeObject(authPacket);
        			username = userID;
+				    ClientConnections.put(username, output);
        			return true;
         	}
         	else{
@@ -200,6 +200,25 @@ public class MessengerServer extends JFrame implements outputLog{
        		}
        		
         }
+        public void MessageRouter(MessagePacket packet) throws IOException{
+        	String errorMessage;
+        	
+    		if(ClientConnections.containsKey(packet.getRecipient())) {
+    			try {
+    				ClientConnections.get(packet.getRecipient()).writeObject(packet);
+    			} catch (IOException e) {
+    				errorMessage = " Could not deliver message to user " + packet.getRecipient();
+    				log(errorMessage);
+    				output.writeObject(new MessagePacket("SERVER::", errorMessage, username));
+    			}
+    		}else{
+    			errorMessage =" Cannot deliver message, user is not connected: "+packet.getRecipient();
+    			log(errorMessage);
+    			output.writeObject(new MessagePacket("SERVER::", errorMessage, username));
+    			
+    		}
+    		
+    	}
                 
     }        
 	
@@ -207,27 +226,11 @@ public class MessengerServer extends JFrame implements outputLog{
 		//TODO: write code to take commands from the server operator
 	}
 	
-	public void MessageRouter(MessagePacket packet){
-		if(ClientConnections.containsKey(packet.getRecipient())) {
-			try {
-				ClientConnections.get(packet.getRecipient()).writeObject(packet);
-			} catch (IOException e) {
-				log("\n Could not deliver message to user " + packet.getRecipient());
-			}
-		}else{
-			log("\n Cannot deliver message, user is not connected: "+packet.getRecipient());
-		}
-		//TODO: write code to route the message packets to the appropriate user
-		//Possibly should be a separate class.
-	}
-	
 	//Method returns a list of all online users
 	public String[] onlineUsers(){
-		String[] ret;
 		Set<String> users = ClientConnections.keySet();
-		ret = (String[]) users.toArray();
-		return ret;
-		
+		String[] ret = users.toArray(new String[0]);
+		return ret;	
 	}
 	
 	public void SendMessage(MessagePacket packet){

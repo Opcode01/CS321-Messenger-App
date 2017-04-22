@@ -127,7 +127,7 @@ public class LaunchWindow extends JFrame {
 		contentPane.add(lblPassword);
 		
 		//TODO: Add password field
-                JButton btnCreateAccount = new JButton("Create Account");
+    JButton btnCreateAccount = new JButton("Create Account");
 		btnCreateAccount.setBounds(282, 127, 142, 29);
 		contentPane.add(btnCreateAccount);
 		
@@ -169,9 +169,11 @@ public class LaunchWindow extends JFrame {
 			e.printStackTrace();
 		}		
 	}
+  
 /////NEW METHOD/////////
-        public void createAccount()
-	{	createAccount register = new createAccount();
+  public void createAccount()
+	{	
+    createAccount register = new createAccount();
 		register.setVisible(true);
 	}
         
