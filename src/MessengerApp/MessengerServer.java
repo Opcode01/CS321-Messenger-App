@@ -124,12 +124,19 @@ public class MessengerServer extends JFrame implements ServerIO{
 							MessageRouter(newMessage);
 						}
 						else if(received.getClass().getName() == "MessengerApp.ServiceRequest"){
-							//Checks to see what users are online and returns that result to the user
+							//Check to see what service the user would like
 							ServiceRequest service = (ServiceRequest) received;
-							service.setResponse(onlineUsers());
-							service.setSuccess(true);
-							output.writeObject(service);
-							
+							if(service.getRequest() == "getOnlineUsers"){
+								service.setResponse(onlineUsers());
+								service.setSuccess(true);
+								output.writeObject(service);
+							}
+							else{
+								log("Cannot understand user request: " +service.getRequest() 
+									+"from user " +username );
+								service.setSuccess(false);
+								output.writeObject(service);
+							}	
 						}
 						else if(received.getClass().getName() == "MessengerApp.AuthenticationPacket"){
 							log("Recieved auth request from client #" + clientNumber +"\n");
@@ -141,11 +148,10 @@ public class MessengerServer extends JFrame implements ServerIO{
 			            		return;
 			            	}
 							else{
-								// Send a welcome message to the client.
-			                	welcomeMessage = "Welcome, " +username +" you are client #" + clientNumber + ".\n";
-			                	output.writeObject(new MessagePacket("SERVER::", welcomeMessage, "Client" ));	
+								   // Send a welcome message to the client.
+			             welcomeMessage = "Welcome, " +username +" you are client #" + clientNumber + ".\n";
+			             output.writeObject(new MessagePacket("SERVER::", welcomeMessage, "Client" ));	
 							}
-
 						}
 						else{
 							//If received something we didn't expect:
@@ -183,7 +189,7 @@ public class MessengerServer extends JFrame implements ServerIO{
        			authPacket.setAuthState(true);
        			output.writeObject(authPacket);
        			username = userID;
-				ClientConnections.put(username, output);
+				    ClientConnections.put(username, output);
        			return true;
         	}
         	else{
@@ -194,7 +200,6 @@ public class MessengerServer extends JFrame implements ServerIO{
        		}
        		
         }
-        
         public void MessageRouter(MessagePacket packet) throws IOException{
         	String errorMessage;
         	

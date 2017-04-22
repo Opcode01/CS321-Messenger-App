@@ -168,7 +168,18 @@ public class MessengerClient extends JFrame{
 		output.flush();
 		showMessage("\nRequesting authentication from server\n");
 	}
+  
+  //new code here***************************************
+  public void registerAccount(String userData)throws IOException
+  {
+      //Send out newAccount request to server
+		  output.writeObject(new ServiceRequest(userData));
+	  	output.flush();
+	  	showMessage("\nCreating account on  server\n");
 	
+   }
+	///End new code/E********************************************************
+  
 	//While chatting with server
 	private void whileChatting() throws IOException{
 		ableToType(true);

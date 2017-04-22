@@ -127,7 +127,18 @@ public class LaunchWindow extends JFrame {
 		contentPane.add(lblPassword);
 		
 		//TODO: Add password field
-
+    JButton btnCreateAccount = new JButton("Create Account");
+		btnCreateAccount.setBounds(282, 127, 142, 29);
+		contentPane.add(btnCreateAccount);
+		
+		btnCreateAccount.addActionListener(		
+				new ActionListener(){
+					public void actionPerformed(ActionEvent event){
+					createAccount();
+				}
+			}
+		);
+		
 	}
 	
 	/**
@@ -158,4 +169,13 @@ public class LaunchWindow extends JFrame {
 			e.printStackTrace();
 		}		
 	}
+  
+/////NEW METHOD/////////
+  public void createAccount()
+	{	
+    createAccount register = new createAccount();
+		register.setVisible(true);
+	}
+        
+///////     END NEW METHOD    ????????????????????????   
 }
