@@ -1,5 +1,8 @@
 package MessengerApp;
 
+import java.io.Serializable;
+import java.util.Set;
+
 /*This packet is used by the client to send requests to the server.
  * The server will read the request, and if it is able to process it, 
  * it will send back the Object requested by the client and set success to true
@@ -7,11 +10,11 @@ package MessengerApp;
  *  This type of packet is intentionally generic to support multiple types of requests.
  */
 
-public class ServiceRequest {
+public class ServiceRequest implements Serializable {
 	
 	private String request;
 	private boolean success = false;
-	private Object response;
+	private String[] response;
 	
 	public ServiceRequest(String service){
 		setRequest(service);
@@ -33,12 +36,12 @@ public class ServiceRequest {
 		this.success = success;
 	}
 
-	public Object getResponse() {
+	public String[] getResponse() {
 		return response;
 	}
 
-	public void setResponse(Object response) {
-		this.response = response;
+	public void setResponse(String[] set) {
+		this.response = set;
 	}
 	
 }

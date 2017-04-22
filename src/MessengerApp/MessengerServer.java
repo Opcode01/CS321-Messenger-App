@@ -105,7 +105,6 @@ public class MessengerServer extends JFrame implements outputLog{
             	input = new ObjectInputStream(socket.getInputStream());
             	output = new ObjectOutputStream(socket.getOutputStream());
             	
-				ClientConnections.put(username, output);
 
                 // Get messages from the clients and print them out in the console.
                 while (true) {
@@ -125,19 +124,12 @@ public class MessengerServer extends JFrame implements outputLog{
 							MessageRouter(newMessage);
 						}
 						else if(received.getClass().getName() == "MessengerApp.ServiceRequest"){
-							//Check to see what service the user would like
+							//Checks to see what users are online and returns that result to the user
 							ServiceRequest service = (ServiceRequest) received;
-							if(service.getRequest() == "getOnlineUsers"){
-								service.setResponse(onlineUsers());
-								service.setSuccess(true);
-								output.writeObject(service);
-							}
-							else{
-								log("Cannot understand user request: " +service.getRequest() 
-									+"from user " +username );
-								service.setSuccess(false);
-								output.writeObject(service);
-							}	
+							service.setResponse(onlineUsers());
+							service.setSuccess(true);
+							output.writeObject(service);
+							
 						}
 						else if(received.getClass().getName() == "MessengerApp.AuthenticationPacket"){
 							log("Recieved auth request from client #" + clientNumber +"\n");
@@ -190,6 +182,7 @@ public class MessengerServer extends JFrame implements outputLog{
        			authPacket.setAuthState(true);
        			output.writeObject(authPacket);
        			username = userID;
+				ClientConnections.put(username, output);
        			return true;
         	}
         	else{
@@ -223,9 +216,8 @@ public class MessengerServer extends JFrame implements outputLog{
 	
 	//Method returns a list of all online users
 	public String[] onlineUsers(){
-		String[] ret;
 		Set<String> users = ClientConnections.keySet();
-		ret = (String[]) users.toArray();
+		String[] ret = users.toArray(new String[0]);
 		return ret;
 		
 	}

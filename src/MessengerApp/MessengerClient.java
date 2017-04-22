@@ -2,6 +2,7 @@ package MessengerApp;
 
 import java.io.*;
 import java.net.*;
+import java.util.Set;
 import java.awt.*;
 import java.awt.event.*;
 
@@ -24,7 +25,7 @@ public class MessengerClient extends JFrame{
 	private MessagePacket message;				//The message object to send back and forth				
 	private String serverIP;					//IP address of the server we want to connect to
 	private String username;					//The username of this Client instance
-	ListModel<String> recipients;				//The people this client can talk to
+	DefaultListModel<String> recipients;		//The people this client can talk to
 	private Socket connection;					//The actual socket used to establish the connection
 	private int serverPort;						//The port that our program uses to connect
 	private String userPassword;				//The password of the user using this client
@@ -81,6 +82,21 @@ public class MessengerClient extends JFrame{
 		lblOnlineUsers.setFont(new Font("Calibri", Font.BOLD, 20));
 		panel.add(lblOnlineUsers, BorderLayout.NORTH);
 		
+		JButton btnRefresh = new JButton("Refresh User List");
+		btnRefresh.setForeground(Color.BLUE);
+		btnRefresh.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		btnRefresh.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent arg) {
+				try{
+					requestOnlineUsers();
+				}catch(IOException e){
+					e.printStackTrace();
+				}
+			}
+		});
+		
+		panel.add(btnRefresh, BorderLayout.SOUTH);
+		
 		userText = new JTextField();
 		getContentPane().add(userText, BorderLayout.SOUTH);
 		userText.setEditable(false);			//Make sure we don't accept any text just yet
@@ -104,10 +120,8 @@ public class MessengerClient extends JFrame{
 		try{
 			connectToServer();
 			setupStreams();
-			if(!requestAuthentication()){
-				showMessage("\nInvalid user/pass. Server refused the connection.");
-			}
-			//((DefaultListModel<String>) recipients).copyInto(requestOnlineUsers());
+			requestAuthentication();
+			requestOnlineUsers();
 			whileChatting();
 		}catch(EOFException eofE){
 			showMessage("\n Client terminated the connection");
@@ -135,54 +149,57 @@ public class MessengerClient extends JFrame{
 		//showMessage("\n The streams are now set up! \n");
 	}
 	
-	private String[] requestOnlineUsers() throws IOException{
+	private void requestOnlineUsers() throws IOException{
 		output.writeObject(new ServiceRequest("getOnlineUsers"));
 		output.flush();
-		try{
-			ServiceRequest response = (ServiceRequest) input.readObject();
-			if(response.isSuccess()){
-				return (String[]) response.getResponse();
-			}
-			else{
-				showMessage("Server could not fulfill the request\n");
-				return null;
-			}
-		}
-		catch(ClassNotFoundException e){
-			showMessage("Could not read data from server\n");
-			return null;
-		}
 	}
 	
-	private boolean requestAuthentication() throws IOException{
+	private void requestAuthentication() throws IOException{
 		//Send out auth request to server
 		output.writeObject(new AuthenticationPacket(username, userPassword));
 		output.flush();
 		showMessage("\nRequesting authentication from server\n");
-		try{
-			AuthenticationPacket response = (AuthenticationPacket) input.readObject();
-			if(response.getAuthState() == true)
-				return true;
-			else
-				return false;
-		}
-		catch(ClassNotFoundException e){
-			showMessage("Could not read data from server");
-			return false;
-		}
 	}
 	
 	//While chatting with server
 	private void whileChatting() throws IOException{
 		ableToType(true);
 		do{
-			try{
-				message = (MessagePacket) input.readObject();				
-				showMessage("\n" + message.getSender() + " - " + message.getMessage());
+			try{				
+				//Copied Looks for the same things as the Server does, but has different implementation.				
+				Object received = input.readObject();
+				if(received.getClass().getName() == "MessengerApp.MessagePacket"){	
+					MessagePacket message = (MessagePacket) received;
+					showMessage("\n" + message.getSender() + " - " + message.getMessage());
+					
+				}
+				else if(received.getClass().getName() == "MessengerApp.ServiceRequest"){
+					//Check to see what service the user would like
+					ServiceRequest service = (ServiceRequest) received;
+					if(service.isSuccess()){
+						String[] string = service.getResponse();
+						recipients.clear();
+						for(int i = 0; i < string.length; i++){
+							recipients.addElement(string[i]);
+						}
+						
+					}
+					else{
+						showMessage("Cannot understand server response: " +service.getRequest());
+					}	
+				}
+				else if(received.getClass().getName() == "MessengerApp.AuthenticationPacket"){					
+					AuthenticationPacket response = (AuthenticationPacket) received;
+					if(!response.getAuthState()){
+						showMessage("\nInvalid user/pass. Server refused the connection.");
+						break;
+					}
+				}				
+				
 			}catch(ClassNotFoundException classNotFoundException){
 				showMessage("Unknown data received!");
 			}
-		}while(!message.getMessage().equals("END"));	
+		}while(true);	
 	}
 	
 	//Close connection
