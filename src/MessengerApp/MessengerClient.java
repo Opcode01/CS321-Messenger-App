@@ -173,9 +173,10 @@ public class MessengerClient extends JFrame{
   public void registerAccount(String userData)throws IOException
   {
       //Send out newAccount request to server
-		  output.writeObject(new ServiceRequest(userData));
+		output.writeObject(new ServiceRequest(userData));
 	  	output.flush();
-	  	showMessage("\nCreating account on  server\n");
+	  	showMessage("\nCreating account on server\n");
+	  	
 	
    }
 	///End new code/E********************************************************

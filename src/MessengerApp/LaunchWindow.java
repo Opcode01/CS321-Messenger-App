@@ -13,9 +13,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+
 import java.awt.Font;
 import javax.swing.SwingConstants;
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JTextArea;
 import javax.swing.JScrollPane;
 
@@ -173,8 +176,21 @@ public class LaunchWindow extends JFrame {
 /////NEW METHOD/////////
   public void createAccount()
 	{	
-    createAccount register = new createAccount();
-		register.setVisible(true);
+	  try{
+	  	String ip = IPAddressField.getText();
+		int port = Integer.parseInt(PortField.getText());
+	  
+	  	Thread newAccountWindow = new Thread(new Runnable(){
+		public void run() {
+			// TODO Auto-generated method stub
+			createAccount register = new createAccount(ip, port);
+			register.setVisible(true);
+		}
+	  });
+	  	newAccountWindow.start();
+	  }catch(NumberFormatException e){
+		JOptionPane.showMessageDialog(null, "Please enter a server name with port to create an account on.");
+	  }
 	}
         
 ///////     END NEW METHOD    ????????????????????????   

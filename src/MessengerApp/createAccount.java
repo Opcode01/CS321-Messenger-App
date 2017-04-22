@@ -11,10 +11,17 @@ package MessengerApp;
  */
 public class createAccount extends javax.swing.JFrame {
 
+	private String user;
+	private String password;
+	private String ip;
+	private int port;
+	
     /**
      * Creates new form createAccount
      */
-    public createAccount() {
+    public createAccount(String ip, int port) {
+    	this.ip = ip;
+    	this.port = port;
         initComponents();
     }
 
@@ -43,7 +50,7 @@ public class createAccount extends javax.swing.JFrame {
         jTextArea1.setRows(5);
         jScrollPane1.setViewportView(jTextArea1);
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
         sendBtn.setText("Register");
         sendBtn.addActionListener(new java.awt.event.ActionListener() {
@@ -126,13 +133,16 @@ public class createAccount extends javax.swing.JFrame {
         String pass2 = new String(password2.getPassword());
         
         boolean success =validateData(user, pass1, pass2);
-            if(!success)
+        if(!success)
 		{
-                    success = validateData(user, pass1,pass2);
+                  success = validateData(user, pass1,pass2);
 		}
-            String newAcctData = user+" "+pass1; //argument fror createAccount method in messengerServer
+        else{
+            String newAcctData = user+" "+pass1; //argument for createAccount method in messengerServer
             connectNewUser(newAcctData);
-    }                                       
+        }
+    }     
+    
     public boolean validateData(String user, String pass1, String pass2)
 	{
 		if ((user.isEmpty()) || (pass1.isEmpty()) || (pass2.isEmpty()))
@@ -146,6 +156,8 @@ public class createAccount extends javax.swing.JFrame {
 			verificationText.setText("All Data Successfully Enterd.");
                         super.update(this.getGraphics());
                         //verificationText.setVisible(true);
+            this.user = user;
+            this.password = pass1;
 			return true;
 		}
 		else 
@@ -156,27 +168,25 @@ public class createAccount extends javax.swing.JFrame {
                         return false;
 			//add code to reset password fields
 		}
-        }
+     }
+    
     public void connectNewUser(String data)
 	  {
 		  try{
-				String ip = "127.0.0.1";
-				int port = 25565;
-				String userN = "new";
-				String pass = "new";
 				String msg=data; ///get message string
 				
 				//We need to run each new client in a Thread because otherwise the program will halt. 
 				//RULE OF THUMB: New thread for every new window.
 				Thread client = new Thread(new Runnable(){
-                                        @SuppressWarnings("empty-statement")
 					public void run(){					
 						//TODO: Run code to authenticate user with server
-						MessengerClient c = new MessengerClient(ip, port, userN, pass);//allow access of new account create method
-                                               try{
-                                                c.registerAccount(msg);}
-                                               catch (Exception e){};
-                                        }
+						MessengerClient c = new MessengerClient(ip, port, user, password);//allow access of new account create method
+                        	try{
+                        		c.registerAccount(msg);
+                        	}catch (Exception e){
+                            	e.printStackTrace();
+                            };
+                     }
 				});	
 				client.start();
 				
@@ -189,43 +199,6 @@ public class createAccount extends javax.swing.JFrame {
 			}
           }
 
-
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(createAccount.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(createAccount.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(createAccount.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(createAccount.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new createAccount().setVisible(true);
-            }
-        });
-        
-          
-    }
 
     // Variables declaration - do not modify                     
     private javax.swing.JLabel jLabel1;

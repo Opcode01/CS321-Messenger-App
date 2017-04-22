@@ -126,17 +126,9 @@ public class MessengerServer extends JFrame implements ServerIO{
 						else if(received.getClass().getName() == "MessengerApp.ServiceRequest"){
 							//Check to see what service the user would like
 							ServiceRequest service = (ServiceRequest) received;
-							if(service.getRequest() == "getOnlineUsers"){
-								service.setResponse(onlineUsers());
-								service.setSuccess(true);
-								output.writeObject(service);
-							}
-							else{
-								log("Cannot understand user request: " +service.getRequest() 
-									+"from user " +username );
-								service.setSuccess(false);
-								output.writeObject(service);
-							}	
+							service.setResponse(onlineUsers());
+							service.setSuccess(true);
+							output.writeObject(service);
 						}
 						else if(received.getClass().getName() == "MessengerApp.AuthenticationPacket"){
 							log("Recieved auth request from client #" + clientNumber +"\n");
