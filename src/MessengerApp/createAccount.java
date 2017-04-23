@@ -61,13 +61,13 @@ public class createAccount extends javax.swing.JFrame {
 
         jLabel4.setText("Verify Password:");
 
-        password2.setText("jPasswordField2");
+        password2.setText("");
 
-        password1.setText("jPasswordField1");
+        password1.setText("");
 
         jLabel3.setText("Enter Password:");
 
-        userName.setText("Enter Username:");
+        userName.setText("");
 
         jLabel2.setText("Select user name:");
 
@@ -138,7 +138,7 @@ public class createAccount extends javax.swing.JFrame {
                   success = validateData(user, pass1,pass2);
 		}
         else{
-            String newAcctData = user+" "+pass1; //argument for createAccount method in messengerServer
+            String newAcctData = (user+" "+pass1); //argument for createAccount method in messengerServer
             connectNewUser(newAcctData);
         }
     }     
@@ -173,19 +173,12 @@ public class createAccount extends javax.swing.JFrame {
     public void connectNewUser(String data)
 	  {
 		  try{
-				String msg=data; ///get message string
-				
 				//We need to run each new client in a Thread because otherwise the program will halt. 
 				//RULE OF THUMB: New thread for every new window.
 				Thread client = new Thread(new Runnable(){
 					public void run(){					
 						//TODO: Run code to authenticate user with server
-						MessengerClient c = new MessengerClient(ip, port, user, password);//allow access of new account create method
-                        	try{
-                        		c.registerAccount(msg);
-                        	}catch (Exception e){
-                            	e.printStackTrace();
-                            };
+						MessengerClient c = new MessengerClient(ip, port, user, password, data);//allow access of new account create method
                      }
 				});	
 				client.start();

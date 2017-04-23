@@ -36,8 +36,7 @@ public class MessengerClient extends JFrame{
 	public MessengerClient(String host, int port, String username, String password){
 		super("Client");	
 		serverIP = host;
-		serverPort = port;		
-		//TODO: Function calls to code that handles routing messages to other users.		
+		serverPort = port;
 		this.username = username;
 		this.userPassword = password;
 		
@@ -46,6 +45,29 @@ public class MessengerClient extends JFrame{
 		
 		//Start running our client
 		startRunning();
+	}
+	
+	//A separate constructor is used in the case that we want to connect with a new user
+	public MessengerClient(String host, int port, String username, String password, String newUserData){
+		super("Client");	
+		serverIP = host;
+		serverPort = port;		
+		this.username = username;
+		this.userPassword = password;
+		
+		//Call the method to register a new user
+		try{
+			registerAccount(newUserData);
+		}catch(IOException e){
+			e.printStackTrace();
+		}
+		
+		//Construct GUI:
+		constructGUI();
+		
+		//Start running our client
+		startRunning();
+		
 	}
 	
 	//@SuppressWarnings("unchecked")
@@ -173,7 +195,7 @@ public class MessengerClient extends JFrame{
   public void registerAccount(String userData)throws IOException
   {
       //Send out newAccount request to server
-		output.writeObject(new ServiceRequest(userData));
+		output.writeObject(new NewUserPacket(userData));
 	  	output.flush();
 	  	showMessage("\nCreating account on server\n");
 	  	

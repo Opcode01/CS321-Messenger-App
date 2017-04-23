@@ -130,6 +130,12 @@ public class MessengerServer extends JFrame implements ServerIO{
 							service.setSuccess(true);
 							output.writeObject(service);
 						}
+						else if(received.getClass().getName() == "MessengerApp.NewUserPacket" ){
+							NewUserPacket newUser = (NewUserPacket) received;
+							con.createAccount(newUser.getUserData());
+							log("Adding new user ");
+						}
+						
 						else if(received.getClass().getName() == "MessengerApp.AuthenticationPacket"){
 							log("Recieved auth request from client #" + clientNumber +"\n");
 							if(!authenticateUser(received)){
