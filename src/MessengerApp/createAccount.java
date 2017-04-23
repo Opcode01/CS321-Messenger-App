@@ -95,9 +95,9 @@ public class createAccount extends javax.swing.JFrame {
                                     .addComponent(jLabel4)))
                             .addGap(61, 61, 61)
                             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addComponent(password2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addComponent(userName, javax.swing.GroupLayout.PREFERRED_SIZE, 156, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addComponent(password1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                                .addComponent(password2, javax.swing.GroupLayout.PREFERRED_SIZE, 173,javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(userName, javax.swing.GroupLayout.Alignment.TRAILING)
+                                .addComponent(password1, javax.swing.GroupLayout.Alignment.TRAILING)))))
                 .addContainerGap(91, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
