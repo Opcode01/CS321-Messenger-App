@@ -3,7 +3,6 @@ package MessengerApp;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
-import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Image;
 
@@ -73,7 +72,6 @@ public class createAccount extends JFrame {
       {
         e.printStackTrace();
       } 
-      setAlwaysOnTop(true);
       setTitle("New User");
       setVisible(true);
       setLocationRelativeTo(null);

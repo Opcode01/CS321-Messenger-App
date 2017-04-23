@@ -88,7 +88,6 @@ public class LaunchWindow extends JFrame {
      */ 
     public LaunchWindow() {
       setMinimumSize(new Dimension(900, 600));
-      setAlwaysOnTop(true);
       setVisible(true);
       setTitle("UNICORN Launcher");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -241,7 +240,7 @@ public void createAccount()
     });
       newAccountWindow.start();
     }catch(NumberFormatException e){
-      JOptionPane.showMessageDialog(null, "Please enter a server name with port to create an account on.");
+        JOptionPane.showMessageDialog(null, "Please enter a server name with port to create an account on.");
     }
   }
       
