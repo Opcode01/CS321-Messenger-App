@@ -179,6 +179,7 @@ public class createAccount extends javax.swing.JFrame {
 					public void run(){					
 						//TODO: Run code to authenticate user with server
 						MessengerClient c = new MessengerClient(ip, port, user, password, data);//allow access of new account create method
+						
                      }
 				});	
 				client.start();

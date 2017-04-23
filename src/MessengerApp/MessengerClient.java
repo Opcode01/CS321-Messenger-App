@@ -27,10 +27,12 @@ public class MessengerClient extends JFrame{
 	private String serverIP;					//IP address of the server we want to connect to
 	private String username;					//The username of this Client instance
 	private String recipient;					//The recipient the user has selected
+	private String newUserData;					//Used only if this is a brand new user
 	private DefaultListModel<String> userList;	//The people this client can talk to
 	private Socket connection;					//The actual socket used to establish the connection
 	private int serverPort;						//The port that our program uses to connect
 	private String userPassword;				//The password of the user using this client
+	private boolean newUserFlag = false;		//If this is a new user, use this to call the register user method
 	
 	//Constructor
 	public MessengerClient(String host, int port, String username, String password){
@@ -56,11 +58,8 @@ public class MessengerClient extends JFrame{
 		this.userPassword = password;
 		
 		//Call the method to register a new user
-		try{
-			registerAccount(newUserData);
-		}catch(IOException e){
-			e.printStackTrace();
-		}
+		newUserFlag = true;
+		this.newUserData = newUserData;
 		
 		//Construct GUI:
 		constructGUI();
@@ -150,6 +149,9 @@ public class MessengerClient extends JFrame{
 		try{
 			connectToServer();
 			setupStreams();
+			if(newUserFlag){
+				registerAccount(newUserData);
+			}
 			requestAuthentication();
 			requestOnlineUsers();
 			whileChatting();
@@ -195,10 +197,10 @@ public class MessengerClient extends JFrame{
   public void registerAccount(String userData)throws IOException
   {
       //Send out newAccount request to server
-		output.writeObject(new NewUserPacket(userData));
+	  	NewUserPacket packet = new NewUserPacket(userData);
+		output.writeObject(packet);
 	  	output.flush();
-	  	showMessage("\nCreating account on server\n");
-	  	
+	  	showMessage("\nCreating account on server\n");  	
 	
    }
 	///End new code/E********************************************************

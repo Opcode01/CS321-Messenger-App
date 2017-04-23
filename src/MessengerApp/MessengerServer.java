@@ -89,7 +89,7 @@ public class MessengerServer extends JFrame implements ServerIO{
             this.socket = socket;
             this.clientNumber = clientNumber;
             log("\nNew connection with client# " + clientNumber + " at " + socket + "\n");
-            con = new jdbcConnection();
+            con = new jdbcConnection("unicorn", "messenger");
         }
 
         /**
@@ -222,6 +222,7 @@ public class MessengerServer extends JFrame implements ServerIO{
 	
 	public void command(String command){
 		//TODO: write code to take commands from the server operator
+		
 	}
 	
 	//Method returns a list of all online users
