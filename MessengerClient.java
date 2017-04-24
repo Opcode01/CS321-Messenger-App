@@ -117,13 +117,19 @@ public class MessengerClient extends JFrame{
         chatWindow.setEditable(false);
         scrollPane.setViewportView(chatWindow);
         
+        JPanel panel = new JPanel();
+        panel.setAutoscrolls(true);
+        panel.setToolTipText("Online Users");
+        panel.setAlignmentY(Component.TOP_ALIGNMENT);
+        panel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        getContentPane().add(panel, "cell 0 1,grow");
+        
         JList<String> OnlineUsers = new JList<String>();
-        getContentPane().add(OnlineUsers, "flowx,cell 0 1");
         OnlineUsers.setBackground(Color.LIGHT_GRAY);
         OnlineUsers.setVisibleRowCount(10);
         OnlineUsers.setAlignmentX(Component.RIGHT_ALIGNMENT);
         OnlineUsers.setAlignmentY(Component.TOP_ALIGNMENT);
-        OnlineUsers.setToolTipText("Online Users");
+        OnlineUsers.setToolTipText("");
         OnlineUsers.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         OnlineUsers.setFont(new Font("Arial", Font.BOLD, 24));  
         OnlineUsers.setModel(userList);
@@ -134,6 +140,8 @@ public class MessengerClient extends JFrame{
                 showMessage("Now talking to "+recipient +". \n");
             }
         });
+        
+        panel.add(OnlineUsers);
         userList = new DefaultListModel<String>();
         
         LaunchWindow.JGradientButton btnRefresh = new LaunchWindow.JGradientButton("Refresh User List");
@@ -154,6 +162,8 @@ public class MessengerClient extends JFrame{
         userText = new JTextField();
         getContentPane().add(userText, "cell 1 2,growx,aligny top");
         userText.setEditable(false);
+        
+        
         
         //Adds an ActionListener to detect when the user presses "Enter" in the user text field.
         userText.addActionListener(     
