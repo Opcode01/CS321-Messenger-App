@@ -119,9 +119,16 @@ public class MessengerClient extends JFrame{
         chatWindow.setEditable(false);
         scrollPane.setViewportView(chatWindow);
         
+        JPanel panel = new JPanel();
+        panel.setBackground(Color.LIGHT_GRAY);
+        panel.setAutoscrolls(true);
+        panel.setToolTipText("Online Users");
+        panel.setAlignmentY(Component.TOP_ALIGNMENT);
+        panel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        getContentPane().add(panel, "cell 0 1,grow");       
+        
         JList<String> OnlineUsers = new JList<String>();
-        getContentPane().add(OnlineUsers, "flowx,cell 0 1");
-        OnlineUsers.setBackground(Color.PINK);
+        OnlineUsers.setBackground(Color.LIGHT_GRAY);
         OnlineUsers.setVisibleRowCount(10);
         OnlineUsers.setAlignmentX(Component.RIGHT_ALIGNMENT);
         OnlineUsers.setAlignmentY(Component.TOP_ALIGNMENT);
@@ -136,6 +143,8 @@ public class MessengerClient extends JFrame{
                 showMessage("Now talking to "+recipient +". \n");
             }
         });
+        
+        panel.add(OnlineUsers);
         
         LaunchWindow.JGradientButton btnRefresh = new LaunchWindow.JGradientButton("Refresh User List");
         btnRefresh.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
