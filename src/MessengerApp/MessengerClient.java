@@ -16,10 +16,10 @@ import net.miginfocom.swing.MigLayout;
 
 /**
  * @author Austin Vickers and Nick Bollis
- * This class is the client side of the CS321 Messenger App.
- * It constructs a GUI that take input from the user and display
- * responses from the server. Uses some modified code from Bucky Roberts available on 
- * GitHub: /buckyroberts/Source-Code-from-Tutorials/Java_Intermediate/57_javaIntermediate.java
+ * This class is the client side of the CS321 Messenger App. It is one of the
+ * 3 major keys to the operation of the system. It constructs a GUI that takes input 
+ * from the user and displays responses from the server. The business logic was written 
+ * by Austin Vickers and the GUI code was written by Nick Bollis
  */
 
 public class MessengerClient extends JFrame{
@@ -180,9 +180,10 @@ public class MessengerClient extends JFrame{
     }
 
 /**
- * The rest of the code in this file was written by @author Austin
+ * The rest of the code in this file was written by @author Austin Vickers
  */
-//Connect to server
+    
+//Start running our client
 public void startRunning(){
     try{
         connectToServer();
@@ -231,7 +232,7 @@ private void requestAuthentication() throws IOException{
     showMessage("\nRequesting authentication from server\n");
 }
 
-//new code here***************************************
+//Method written by Jim Seymour to set up a new account on the server
 public void registerAccount(String userData)throws IOException
 {
   //Send out newAccount request to server
@@ -245,7 +246,13 @@ public void registerAccount(String userData)throws IOException
 
 //While chatting with server
 private void whileChatting() throws IOException{
-    ableToType(true);
+    ableToType(true);    
+    /*
+     * This large block of code runs in a while loop to avoid synchronization issues. The
+     * client is designed in the same way the server is to take inputs of multiple types and
+     * handle them based on the type. This runs until the server closes the connection or the
+     * user closes the window.
+     */
     do{
         try{                
             //Copied Looks for the same things as the Server does, but has different implementation.                

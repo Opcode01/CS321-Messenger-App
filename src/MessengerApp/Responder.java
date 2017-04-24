@@ -5,9 +5,16 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
-/*NOTE: This is a NESTED CLASS. A subclass of MessengerServer.
+/** Works like a subclass of MessengerServer. This class does all of
+ * the logic that the server needs to calculate for each individual user.
+ * It implements the ServerIO interface that in this class is used to pass
+ * data along the the MessengerServer parent class's methods. It however, 
+ * does not accept commands like the parent class does.
+ * 
  * Copied and modified from "ASimpleServer" code by Huaming Zhang
+ * @author Austin Vickers, Huaming Zhang
  */
+
 public class Responder extends Thread implements ServerIO{
 	
     private final Socket socket;
@@ -44,6 +51,13 @@ public class Responder extends Thread implements ServerIO{
                 String message;
                 String sender;
                 String recipient;
+                
+                /*
+                 * This large block uses the .getClass() methods in java to allow the server to take
+                 * inputs of multiple different types. Each one is operated on differently, and returns
+                 * different things to the client. All this runs in a loop which allows us to avoid 
+                 * synchronization issues. The code only actually runs when we recieve some data.
+                 */
 				try {
 					Object received = input.readObject();
 					if(received.getClass().getName() == "MessengerApp.MessagePacket"){						
@@ -99,6 +113,7 @@ public class Responder extends Thread implements ServerIO{
         } catch (IOException e) {
             log("\n Error handling client# " + clientNumber + ": " + e);
         }
+        //When the loop is broken, indicating a disconnect, we need to close out all the streams and sockets
 		finally {
             try {
             	MessengerServer.getClientConnections().remove(username);
@@ -112,6 +127,7 @@ public class Responder extends Thread implements ServerIO{
         }
     }
     
+    //This method is used along with the jdbcConnection to authenticate users
     public boolean authenticateUser(Object Packet) throws IOException{
     	//First packet received should be a MessagePacket with the auth value as false    
     	AuthenticationPacket authPacket = (AuthenticationPacket) Packet;
@@ -133,6 +149,8 @@ public class Responder extends Thread implements ServerIO{
    		}
    		
     }
+    
+    //Message routing algorithm written by Matthew Legowski
     public void MessageRouter(MessagePacket packet) throws IOException{
     	String errorMessage;
     	
@@ -152,7 +170,8 @@ public class Responder extends Thread implements ServerIO{
 		}
 		
 	}
-
+    
+    //Implementation of ServerIO interface methods
 	public void log(String message) {
 		// TODO Auto-generated method stub
 		MessengerServer.log(message);

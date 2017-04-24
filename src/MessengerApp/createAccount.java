@@ -26,7 +26,7 @@ import net.miginfocom.swing.MigLayout;
 /**
  * This createAccount class presents a GUI that allows users to enter credentials and create a
  * new user account to be used on our server.
- * @author tr1ck and Nick Bollis
+ * @author Jim Seymour and Nick Bollis
  */
 public class createAccount extends JFrame {
 

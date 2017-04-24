@@ -40,7 +40,7 @@ import net.miginfocom.swing.MigLayout;
  * This information is passed to the actual MessengerClient that we use to interact 
  * with the server.
  * 
- * @author Nick Bollis and Austin
+ * @author Nick Bollis and Austin Vickers
  *
  */
 

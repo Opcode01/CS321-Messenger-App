@@ -1,6 +1,5 @@
 package MessengerApp;
 
-//import com.sun.deploy.util.SessionState;
 import javax.swing.*;
 import java.net.*;
 import java.io.*;
@@ -8,15 +7,16 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
 
-/*
- * @author Austin Vickers, Huaming Zhang
+/**
+ * @author Austin Vickers, Jim Seymour, Matthew Legowski
  * 
  * This class is for the server side of the CS321 Messenger App.
- * This is the server console window. It implements an interface "outputLog"
+ * This is the server console window. It implements an interface "ServerIO"
  * that is used by both the MessageServer and the Responder class to output
- * messages to the console.
+ * messages to the console. It can be run in a GUI mode or a command-line only
+ * mode for Unix based machines by adding the arguement "headless"
  * 
- * Note: Some things are labeled as "Static" and "Final" becuase there should only ever be one instance of this class
+ * Note: Some things are labeled as "Static" and "Final" because there should only ever be one instance of this class
  * running on a machine. This also allows us to make the Responder class its own object
  */
 
@@ -25,10 +25,12 @@ public final class MessengerServer extends JFrame implements ServerIO{
 	private JTextField commandLine;			//Place to enter commands
 	private static JTextArea console;		//Viewport to the server console
 	private int port = 25565;				//Port the server runs on. MUST MATCH THE PORT OF THE CLIENT!
+	
 	//This Map contains all the users currently connected. Written by Matthew Legowski
 	private static Map<String, ObjectOutputStream> ClientConnections = new HashMap();
+	
+	//The jdbcConnection class is contains all info relating to authentication of users. Written by Jim Seymour
 	private jdbcConnection con = new jdbcConnection("unicorn", "messenger");
-	private Console SYSconsole;
 	
 	public static void main(String args[]){
 		System.out.println("The server is starting...");
@@ -62,6 +64,7 @@ public final class MessengerServer extends JFrame implements ServerIO{
 			}
 	}
 	
+	//A simple method that constructs a simple gui
 	private void constructGUI(){
 		//Add a command line so we can interface with the server
 			commandLine = new JTextField();
@@ -112,11 +115,13 @@ public final class MessengerServer extends JFrame implements ServerIO{
         }
 	}
 	
+	//Method that can be called by the server administrator to shut down the server
 	private void shutdownServer(){
 		log("Messenger Server shutting down NOW");
 		System.exit(0);
 	}
 	
+	//Commands typed by the server admin are parsed and executed here.
 	public void command(String command) {
 	try{
 		if(command.contains("/setDBAdminName")){

@@ -1,4 +1,5 @@
-	/*
+
+/*
 	 * This class contains retrieval and insertion methods for the Oracle database. The code 
 	 isn't particularly streamlined, but all the methods do what they are supposed to. I just wanted to make sure this got 
 	 uploaded.
@@ -66,10 +67,6 @@ public class jdbcConnection{ //implements Connection{
 		return success;
 	}
 	
-
-		
-
-
 	
 	/*takes user data from form and creates account, stored in database. **/
 	public void createAccount(String userData)

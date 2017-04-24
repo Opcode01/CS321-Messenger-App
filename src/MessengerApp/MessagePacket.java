@@ -3,9 +3,15 @@ package MessengerApp;
 
 import java.io.Serializable;
 
-/*
- * @author Austin Vickers
+/**
+ * Every message that is sent between two users contains three basic pieces of information:
+ * where the message came from, who its going to, and what the message contains. These bits
+ * of informations are wrapped up nicely in this MessagePacket class. This class is used by the
+ * server to route the messages to different users, and used by the clients to display the contents
+ * of the message and where it came from. This class is an integral part to the operation of the 
+ * entire system.
  * 
+ * @author Austin Vickers
  */
 
 public class MessagePacket implements Serializable {

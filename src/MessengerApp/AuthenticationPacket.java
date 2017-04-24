@@ -2,6 +2,13 @@ package MessengerApp;
 
 import java.io.Serializable;
 
+/*This class is sent from the client to the server and is used by the server to run
+ * authentication. The server acts as an interface in between the jdbcConnection and
+ * the client.
+ * 
+ * @author Austin Vickers
+ */
+
 public class AuthenticationPacket implements Serializable {
 
 	private String sender;
